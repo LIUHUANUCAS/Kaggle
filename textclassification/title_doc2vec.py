@@ -4,7 +4,17 @@ import jieba.analyse
 from gensim.test.utils import common_texts, get_tmpfile
 from gensim.models import Word2Vec
 import numpy as np
+import sys
+# reload(sys)
+# sys.setdefaultencoding('utf-8')
 
+class Feature :
+    def init(self,label,flen,orig_sentence,cutwordlist ):
+        self.label = label
+        self.flen = flen
+        self.sentence = orig_sentence
+        self.cutwordlist = cutwordlist
+    
 def loadfile(filename):
     rawdata = []
     i = 0
@@ -13,29 +23,57 @@ def loadfile(filename):
             lines = line.rstrip().split('\t')
             # print lines[0],lines[-1]
             if i == 0 :
-                i  =1 
+                i  = 1 
                 continue
-            rawdata.append( (lines[0],lines[-1] ))
+            e =(lines[0],lines[-1])
+            rawdata.append( e )
+            # rawdata.append( (lines[0],lines[-1] ))
     return rawdata
+
+seta = u"。？！，、；：“”‘’（ ）《 》〈 〉【 】『 』「 」﹃ ﹄〔 〕…—～﹏￥"
+stop_word_list_set = set([ e for e in seta])
+print(seta)
+def getstoplen(cut_word_list):
+    """get stop list len"""
+    return sum([1 for e in cut_word_list if e in stop_word_list_set])
+
+def getsentencelen(sentence):
+    return len(sentence)
+
 def getvec():
     rawdata = loadfile('title.log')
     wordvec = []
     for e in rawdata:
-        cutwordslist = jieba.cut(e[1],cut_all=False)
-        wordvec.append( ( e[0],[x for x in cutwordslist]) )
+        # print len(e[1])
+        cutwordslist = jieba.cut(e[1].rstrip())
+        tmplist = [x for x in cutwordslist]
+        # print len(tmplist)
+        e1 = (e[0],len(e[1]),getstoplen(tmplist) )
+        wordvec.append( ( e1, [x for x in tmplist] ) )
     return wordvec
+
 cutwordlist = getvec()
+# print cutwordlist
+for e in cutwordlist[1][1]:
+    print (e in stop_word_list_set)
 wordlist = [e[1] for e in cutwordlist]
+print (stop_word_list_set,'，')
+# print '》'.encode('utf8') in seta 
+# for e in stop_word_list_set:
+#     print e
+# print u'》' in stop_word_list_set
 # for e in wordlist:
 #     print e
-model = Word2Vec(wordlist,size=100,window=5,min_count=1,workers=4)
+size = 50
+# print wordlist
+model = Word2Vec(wordlist,size=size,window=5,min_count=1,workers=4)
+
 
 w1 = wordlist[0]
-size = 100
 f = open('new1.csv','w')
-print >> f,','.join(['label'] + ['attr_'+ str(i) for i in range(size)])
+print >> f,','.join(['label'] + ['sentence_len','stopwordcount'] +['attr_'+ str(i) for i in range(size)])
 for tdata in cutwordlist:
-    label = tdata[0]
+    label = tdata[0][0]
     doc = tdata[1]
     resarray = np.zeros((size,))
     # print resarray.shape
@@ -46,7 +84,7 @@ for tdata in cutwordlist:
         # print model.wv[w].shape
         # break
         # print model.wv[w]
-    print >>f,','.join([str(label)] + [str(e) for e in resarray])
+    print >>f,','.join(['pass' if str(label) == '2' else 'reject'] + [str(tdata[0][1]),str(tdata[0][2]) ] + ['%.2f'%e for e in resarray])
 f.close()
 # print resarray
 # wordvec = getvec2()
