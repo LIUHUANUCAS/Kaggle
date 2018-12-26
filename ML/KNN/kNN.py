@@ -148,30 +148,36 @@ def kaggleHandWritingClassTest():
             vec = [1 if int(e) > 0 else 0 for e in line[1:] ]
             data.append(vec)
 
+    traindata = np.array(data)
+    print(traindata.shape)
+
     k = 3
-    with open(testfile) as f:
+    with open(testfilename) as f:
         i = 0 
         for line in f.readlines():
             if i == 0 :
                 i = 1
                 continue
             line = line.rstrip().split(',')
-            vec = [1 if int(e) > 0 else 0 for e in line[1:] ]
+            vec = [1 if int(e) > 0 else 0 for e in line ]
             tlabel = classify0(np.array(vec),traindata,label,k )
-            print i,tlabel
+            print (i,tlabel)
             i += 1
 
 
 
 if __name__ == '__main__':
-    testdata = [30000,0.5,0.5]
-    print (testdata)
-    k = 5
-    data,label = file2matrix('./datingTestSet.txt')
-    norm_data,ranges,minvals = autoNorm(data)
-    normtestdata = normTestData(testdata,ranges,minvals)
-    test_label = classify0(normtestdata,norm_data,label,k)
-    print(testdata,test_label)
+    #kaggleHand
+    kaggleHandWritingClassTest()
+    #return 
+    #testdata = [30000,0.5,0.5]
+    #print (testdata)
+    #k = 5
+    #data,label = file2matrix('./datingTestSet.txt')
+    #norm_data,ranges,minvals = autoNorm(data)
+    #normtestdata = normTestData(testdata,ranges,minvals)
+    #test_label = classify0(normtestdata,norm_data,label,k)
+    #print(testdata,test_label)
 
 
 
