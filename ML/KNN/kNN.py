@@ -1,5 +1,8 @@
 import numpy as np
+import numpy as array
 import operator
+import os
+import pandas as pd
 
 def createDataSet():
     group = array([
@@ -74,6 +77,91 @@ def datingClassTest():
         else :
             err += 1
     print('right:%d,r_ratio:%f,err:%d,err_%f'% (r,r*1.0/testsize,err,err*1.0/testsize))
+
+# read hand written file to vector
+def img2vector(filename):
+    data = []
+    with open(filename) as f:
+        for line in f.readlines():
+            line = line.rstrip()
+            vec = [int(e) for e in list(line)]
+            data = data + vec
+    return np.array([data])
+
+def handWritingClassTest():
+    label = []
+    traindir = './digits/trainingDigits/'
+    trainfilenames = os.listdir(traindir)
+    size = len(trainfilenames)
+    train_data = np.zeros( (size,1024) )
+    i = 0
+    for fname in trainfilenames:
+        tlabel = fname.rstrip().split('_')[0]
+        tlabel = int(tlabel)
+        label.append(tlabel)
+        data = img2vector(traindir + fname)
+        # print(data.shape)
+        train_data[i,:] = data
+        i += 1
+    testdir = './digits/trainingDigits/'
+    testfilenames = os.listdir(testdir)
+    # test_data = np.array((len(testfilenames,1024)))
+    # i = 0 
+    # testlabel = []
+    k = 3
+    err = 0
+    r = 0
+    for fname in testfilenames:
+        l = fname.rstrip().split('_')[0]
+        l = int(l)
+        testdata = img2vector(testdir + fname)
+        tlabel = classify0(testdata,train_data,label,k)
+        if tlabel == l:
+            r +=1
+        else:
+            err += 1
+    print('err:%d,err_rate:%f'%(err,float(err)/len(testfilenames)))
+        # testlabel.append(l)
+        # test_data[i,:] = img2vector(testdir + fname)
+        # i += 1
+
+
+
+def kaggleHandWritingClassTest():
+    trainfilename = './train.csv'
+    testfilename = './test.csv'
+    # data = pd.read_csv(trainfilename)
+    # testdata = pd.read_csv(testfilename)
+    # label = data['label']
+    # traindata = data.iloc[:,1:]
+    label = []
+    data = []
+    with open(trainfilename) as f:
+        i = 0
+        
+        for line in f.readlines():
+            if i == 0 :
+                i = 1
+                continue
+            line = line.rstrip().split(',')
+            label.append(int(line[0]))
+            vec = [1 if int(e) > 0 else 0 for e in line[1:] ]
+            data.append(vec)
+
+    k = 3
+    with open(testfile) as f:
+        i = 0 
+        for line in f.readlines():
+            if i == 0 :
+                i = 1
+                continue
+            line = line.rstrip().split(',')
+            vec = [1 if int(e) > 0 else 0 for e in line[1:] ]
+            tlabel = classify0(np.array(vec),traindata,label,k )
+            print i,tlabel
+            i += 1
+
+
 
 if __name__ == '__main__':
     testdata = [30000,0.5,0.5]
