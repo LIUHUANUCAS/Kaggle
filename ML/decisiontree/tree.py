@@ -1,6 +1,7 @@
 
 from math import log
 from collections import defaultdict
+import numpy as np
 
 # calculate shannon entropy
 def calcShannonEnt(dataSet):
@@ -37,6 +38,7 @@ def splitDataSet(data,axis,value):
             retData.append(reduceFeatVec)
     return retData
 
+# choose best feature index
 def chooseBestFeatureToSplit(data):
     featLen = len(data[0]) - 1
     baseEntropy = calcShannonEnt(data)
@@ -50,20 +52,22 @@ def chooseBestFeatureToSplit(data):
             subSet = splitDataSet(data,i,v)
             prob = len(subSet) / float(len(data))
             newEntropy += prob * calcShannonEnt(subSet)
-            infoGain = baseEntropy - newEntropy
-            if (infoGain > bestInfoGain):
-                bestInfoGain = infoGain
-                bestFeature = i
+        infoGain = baseEntropy - newEntropy
+        if (infoGain > bestInfoGain):
+            bestInfoGain = infoGain
+            bestFeature = i
 
     return bestFeature
 
+# get majority class for classlist
 def majorityCnt(classList):
-    labelCount = defalutdict(int)
+    labelCount = defaultdict(int)
     for e in classList:
         labelCount[e] += 1
     sortedClass = sorted(labelCount.items(),key = lambda x :x[1],reverse=True)
     return sortedClass[0][0] # most class label
 
+# create tree
 def createTree(dataSet,label):
     classList = [e[-1] for e in dataSet]
     if classList.count(classList[0]) == len(classList):
@@ -80,7 +84,94 @@ def createTree(dataSet,label):
         subLabel = label[:]
         splitdata = splitDataSet(dataSet,bestFeat,v)
         myTree[bestLabel][v] = createTree(splitdata,subLabel)
-
     return myTree
+
+import matplotlib.pyplot as plt
+decisionNode = dict(boxstyle="sawtooth",fc="0.8")
+leafNode = dict(boxstyle="round4",fc="0.8")
+def plotNode(nodeTxt,centerPt,parentPt,nodeType):
+    createPlot.ax1.annotate(nodeTxt,xy=parentPt,xytext=centerPt,textcoords='axs fraction',
+            va='center',ha='center',bbox=nodeType,arrowprops=arrow_args)
+
+
+def createPlot():
+    fig = plt.figure(1,facecolor='white')
+    fig.clf()
+    createPlot.ax1 = plt.subplot(111,frameon=False)
+    plotNode('a decision node',(0.5,0.1),(0.1,0.5),decisionNode)
+    plotNode('a leaf node',(0.8,0.1),(0.3,0.8),leafNode)
+    plt.show()
+
+
+def getNumLeafs(myTree):
+    numLeafs = 0
+    firstStr = myTree.keys()[0]
+    secondDict = myTree[firstStr]
+    for k in secondDict.keys():
+        if type(secondDict[k]).__name__ == 'dict':
+            numLeafs += getNumLeafs(secondDict[k])
+        else:
+            numLeafs += 1
+    return numLeafs
+
+def getTreeDepth(myTree):
+    maxDepth = 0
+    firstStr = myTree.keys()[0]
+    secondDict = myTree[firstStr]
+    for k in secondDict.keys():
+        if type(secondDict[k]).__name__ == 'dict':
+            thisDepth = 1 + getTreeDepth(secondDict[k])
+        else:
+            thisDepth = 1
+        if thisDepth > maxDepth:
+            maxDepth = thisDepth
+    return maxDepth
+
+def retrieveTree(i):
+    listOfTrees = [
+            {
+                'no surfacing':{0:'no',1:{ 'flippers': \
+                        {0:'no',1:'yes'}}}},
+                {'no surfacing':{0:'no',1:{ 'flippers': \
+                        {0:{'head':{ 0:'no',1:'yes'}},1:'no'}}}}
+            ]
+    return listOfTrees[i]
+
+
+
+
+if __name__ == '__main__':
+    print("main")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
