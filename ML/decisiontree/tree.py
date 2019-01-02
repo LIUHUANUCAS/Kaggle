@@ -47,11 +47,12 @@ def chooseBestFeatureToSplit(data):
     for i in range(featLen):
         featList = [row[i] for row in data]
         uniqueVals = set(featList)
+        # one feature to calc Entropy
         newEntropy = 0.0
         for v in uniqueVals:
             subSet = splitDataSet(data,i,v)
-            prob = len(subSet) / float(len(data)) # probability with selected attribute diff values
-            newEntropy += prob * calcShannonEnt(subSet) # conditional distribute with entropy
+            prob = len(subSet) / float(len(data))
+            newEntropy += prob * calcShannonEnt(subSet)
         infoGain = baseEntropy - newEntropy
         if (infoGain > bestInfoGain):
             bestInfoGain = infoGain
