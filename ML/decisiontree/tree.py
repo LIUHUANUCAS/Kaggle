@@ -33,7 +33,7 @@ def splitDataSet(data,axis,value):
     retData = []
     for f in data:
         if f[axis] == value:
-            reduceFeatVec = f[:axis]
+            reduceFeatVec = f[:axis]   # filter row that not equal specific value
             reduceFeatVec += f[axis+1:]
             retData.append(reduceFeatVec)
     return retData
@@ -50,8 +50,8 @@ def chooseBestFeatureToSplit(data):
         newEntropy = 0.0
         for v in uniqueVals:
             subSet = splitDataSet(data,i,v)
-            prob = len(subSet) / float(len(data))
-            newEntropy += prob * calcShannonEnt(subSet)
+            prob = len(subSet) / float(len(data)) # probability with selected attribute diff values
+            newEntropy += prob * calcShannonEnt(subSet) # conditional distribute with entropy
         infoGain = baseEntropy - newEntropy
         if (infoGain > bestInfoGain):
             bestInfoGain = infoGain
@@ -137,7 +137,31 @@ def retrieveTree(i):
             ]
     return listOfTrees[i]
 
+# classify with decision tree
+def classify(tree,featLabels,testVec):
+    firstStr = tree.keys()[0] # first selected attribute name
+    secondDict = tree[firstStr] # attribute tree
+    featIndex = featLabels.index[firstStr] # selected attribute index
+    for k in secondDict.keys():
+        if testVec[featIndex] == k:
+            if type(secondDict[k]).__name__  == 'dict':
+                classlabel = classify(secondDict[k],featLabels,testVec)
+            else:
+                classLabel = secondDict[k]
+    return classLabel
 
+# store tree with pickle
+def storeTree(inputTree,filename):
+    import pickle
+    fw = open(filename,'wb')
+    pickle.dump(inputTree,fw)
+    fw.close()
+
+# restore tree with pickle
+def grabTree(filename):
+    import pickle
+    fr = open(filename,'rb')
+    return pickle.load(fr)
 
 
 if __name__ == '__main__':
