@@ -136,5 +136,56 @@ def spamTest():
     print('err rate:',float(errcount)/ len(testSet))
 
         
+def smsclassification():
+    wordstringdata = []
+    
+    import re
+    with open('./SMSSpamCollection.txt') as f:
+        #wordstringdata = [re.split(r'\W*',e.rstrip()) for e in f.readlines()]
+        wordstringdata = [e.rstrip() for e in f.readlines()]
 
+    #print(wordstringdata)
+
+    doclist = []
+    label = []
+    labelMap = {'ham':0,'spam':1}
+    labellist = []
+    for doc in wordstringdata:
+        wordlist = re.split(r'\W*',doc) 
+        wordlist = [e.lower() for e in wordlist if len(e) > 2]
+        doclist.append(wordlist[1:])
+        labellist.append(wordlist[0])
+
+    #print(doclist)
+    #return
+    vocablist = createVocabList(doclist)
+    train_array = []
+
+    for i,doc in enumerate(doclist):
+        train_array.append(setOfWords2Vec(vocablist,doc))
+        label.append(labelMap[labellist[i]])
+
+    testsize = int(len(train_array)*0.85)
+
+    test_array = train_array[testsize:]
+    test_label = label[testsize:]
+    train_array_ = train_array[:testsize]
+    train_label = label[:testsize]
+
+    #train NB
+    p0v,p1v,pSpam = trainNB0(array(train_array_),array(train_label))
+    
+    #test 
+    errcount = 0
+    for i,d in enumerate(test_array):
+        classlabel = classifyNB(array(d),p0v,p1v,pSpam)
+        if classlabel != test_label[i]:
+            errcount += 1 
+
+    errcount = float(errcount)/len(test_array)
+    print('err rate:%f'% errcount )
+
+
+
+smsclassification()
 
