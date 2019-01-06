@@ -1,5 +1,6 @@
 
 from math import  exp
+from numpy import *
 
 def loadSet():
     data = []
@@ -18,4 +19,14 @@ def sigmod(x):
 
 def gradent_ascent(dataMatin,label):
     dataMat = mat(dataMatin)
+    labelMat = mat(label).transpose()
+    m,n = shape(dataMat)
+    alpha = 0.001
+    max_cycles = 500
+    weights = ones(n,1)
+    for k in range (max_cycles):
+        h = sigmod(dataMat*weights)
+        err = (labelMat - h)
+        weights += alpha * dataMat.transpose() *err
+    return weights
 
