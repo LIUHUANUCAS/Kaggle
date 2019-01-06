@@ -17,16 +17,26 @@ def loadSet():
 def sigmod(x):
     return 1.0/(1 + exp(-x))
 
-def gradent_ascent(dataMatin,label):
+# gradient ascent
+def gradient_ascent(dataMatin,label):
     dataMat = mat(dataMatin)
     labelMat = mat(label).transpose()
     m,n = shape(dataMat)
     alpha = 0.001
     max_cycles = 500
-    weights = ones(n,1)
+    weights = ones((n,1))
     for k in range (max_cycles):
         h = sigmod(dataMat*weights)
         err = (labelMat - h)
         weights += alpha * dataMat.transpose() *err
     return weights
 
+def stochastic_gradient_ascent(dataMatrix,classLabels):
+    m,n = shape(dataMatrix)
+    alpha = 0.01
+    weights = ones(n)
+    for i in range(m):
+        h = sigmod(sum(dataMatrix[i]*weights))
+        err = classLabels[i] - h
+        weights += alpha * err * dataMatrix[i]
+    return weights
